@@ -7,7 +7,7 @@ import {
   Popup,
   Polyline,
 } from "react-leaflet";
-import L, { type LatLngExpression } from "leaflet";
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState } from "react";
 
