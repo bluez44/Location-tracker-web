@@ -40,7 +40,7 @@ function App() {
   const getLocation = () => {
     fetch("https://location-tracker-api-black.vercel.app/api/locations")
       .then((response) => response.json())
-      .then((res) => setLocations(res.data))
+      .then((res) => setLocations(res.data.slice(res.data.length-2)))
       .catch((error) => console.error(error))
       .finally(() => console.log("Locations fetched"));
   };
