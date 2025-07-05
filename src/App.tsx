@@ -7,52 +7,78 @@ import {
   Popup,
   Polyline,
 } from "react-leaflet";
-import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select, { type SelectChangeEvent } from "@mui/material/Select";
+import TextField from "@mui/material/TextField";
+import DatePicker from "react-datepicker";
+import Button from "@mui/material/Button";
 
-class location {
-  _id: string;
-  latitude: number;
-  longitude: number;
-  constructor() {
-    this._id = "";
-    this.latitude = 0;
-    this.longitude = 0;
-  }
-}
+import createNumberIcon from "../utils/createNumberIcon";
+import {
+  getAllLocations,
+  getTimeRangeLocations,
+  getTodayLocations,
+} from "../utils/api";
 
-// Numbered icon creator
-function createNumberIcon(number: number) {
-  return L.divIcon({
-    html: `<div class="number-marker">${number}</div>`,
-    className: "", // Remove default leaflet styles
-    iconSize: [30, 30],
-    iconAnchor: [15, 30],
-    popupAnchor: [0, -30],
-  });
-}
+import type { LocationRet } from "../models/location";
+import DateObject from "react-date-object";
+import type { LatLngTuple } from "leaflet";
 
 function App() {
-  const [locations, setLocations] = useState<location[]>([]);
+  const [locations, setLocations] = useState<LocationRet[]>([]);
   const [getLocationsTimer, setGetLocationsTimer] = useState(0);
 
-  const getLocation = () => {
-    fetch("https://location-tracker-api-black.vercel.app/api/locations")
-      .then((response) => response.json())
-      .then((res) => setLocations(res.data.slice(res.data.length-2)))
-      .catch((error) => console.error(error))
-      .finally(() => console.log("Locations fetched"));
+  const [startDate, setStartDate] = useState<Date | null>(new Date());
+  const [endDate, setEndDate] = useState<Date | null>(new Date());
+  const [vehicleNumber, setVehicleNumber] = useState(
+    localStorage.getItem("vehicleNumber") || ""
+  );
+
+  const [isSearching, setIsSearching] = useState(false);
+
+  const [location, setLocation] = useState<LatLngTuple>([0, 0]);
+
+  useLayoutEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation([position.coords.latitude, position.coords.longitude]);
+        },
+        (error) => {
+          console.error("Error getting location: ", error);
+        }
+      );
+    } else {
+      console.log("Geolocation not supported");
+    }
+  }, []);
+
+  const handleGetAllLocations = async () => {
+    if (!vehicleNumber) return;
+    const res = await getAllLocations(vehicleNumber);
+
+    if (res.data.length > 0) {
+      setLocations(res.data);
+    } else {
+      setLocations([]);
+      alert("No locations found");
+    }
+
+    setIsSearching(false);
   };
 
   useEffect(() => {
-    getLocation();
+    handleSearch();
   }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
       if (getLocationsTimer === 0) {
-        getLocation();
+        handleSearch();
         setGetLocationsTimer(10);
         return;
       }
@@ -63,23 +89,138 @@ function App() {
     return () => clearInterval(timer);
   }, [getLocationsTimer]);
 
+  const [queryType, setQueryType] = useState("");
+
+  const handleChange = (event: SelectChangeEvent) => {
+    setQueryType(event.target.value as string);
+  };
+
+  const handleSearch = async () => {
+    setIsSearching(true);
+    if (queryType === "Today") {
+      const res = await getTodayLocations(vehicleNumber);
+
+      if (res.data.length > 0) {
+        setLocations(res.data);
+      } else {
+        setLocations([]);
+        alert("No locations found for today");
+      }
+
+      setIsSearching(false);
+    } else if (queryType === "Time range") {
+      if (startDate && endDate) {
+        const res = await getTimeRangeLocations(
+          vehicleNumber,
+          startDate,
+          endDate
+        );
+
+        if (res.data.length > 0) {
+          setLocations(res.data);
+        } else {
+          setLocations([]);
+          alert("No locations found for time range");
+        }
+
+        setIsSearching(false);
+      } else {
+        setIsSearching(false);
+        alert("Please select both start and end dates.");
+      }
+    } else {
+      handleGetAllLocations();
+    }
+    
+    setIsSearching(false);
+  };
+
+  useEffect(() => {
+    const listener = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        handleSearch();
+      }
+    };
+    window.addEventListener("keydown", listener);
+
+    return () => window.removeEventListener("keydown", listener);
+  }, []);
+
   return (
-    <div style={{ height: "100vh", width: "100vw" }}>
-      <h1>Auto get location after 10s. Time left: {getLocationsTimer}s</h1>
-      {locations.length > 0 ? (
+    <div className="h-screen w-screen flex flex-col items-center">
+      <h1 className="text-2xl my-10">
+        Auto get location after 10s. Time left: {getLocationsTimer}s
+      </h1>
+      <div className="flex gap-4 items-center mb-5">
+        <div className="min-w-100">
+          <FormControl fullWidth>
+            <InputLabel id="query_type" className="text-white">
+              Chose data time
+            </InputLabel>
+            <Select
+              labelId="query_type"
+              id="query_type"
+              value={queryType}
+              label="Chose data time"
+              onChange={handleChange}
+            >
+              <MenuItem value={"Today"}>Today</MenuItem>
+              <MenuItem value={"Time range"}>Time range</MenuItem>
+              <MenuItem value={"All time"}>All time</MenuItem>
+            </Select>
+          </FormControl>
+          {queryType === "Time range" && (
+            <div className="flex mt-3 justify-content-between">
+              <DatePicker
+                className="py-2 px-2 border-1 rounded mx-3"
+                selected={startDate}
+                dateFormat={"dd/MM/yyyy"}
+                onChange={(date) => setStartDate(date as Date | null)}
+              />
+              <DatePicker
+                className="py-2 px-2 border-1 rounded mx-3"
+                selected={endDate}
+                dateFormat={"dd/MM/yyyy"}
+                onChange={(date) => setEndDate(date as Date | null)}
+              />
+            </div>
+          )}
+        </div>
+        <TextField
+          label="Vehicle number"
+          variant="outlined"
+          placeholder="Enter vehicle number"
+          value={vehicleNumber}
+          onChange={(e) => {
+            setVehicleNumber(e.target.value);
+            localStorage.setItem("vehicleNumber", e.target.value);
+          }}
+        />
+        <Button variant="contained" onClick={handleSearch}>
+          Search
+        </Button>
+      </div>
+      {!isSearching ? (
         <MapContainer
-          center={[locations[0].latitude, locations[0].longitude]}
+          center={
+            locations.length > 0
+              ? [locations[0].latitude, locations[0].longitude]
+              : [...location]
+          }
           zoom={13}
-          style={{ height: "100%", width: "100%" }}
+          className="h-full w-full z-0"
         >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          {locations.map((loc: any, index) => (
+          {locations.map((loc: LocationRet, index) => (
             <Marker
               key={loc._id}
               position={[loc.latitude, loc.longitude]}
               icon={createNumberIcon(index + 1)}
             >
-              <Popup>Hehe</Popup>
+              <Popup>
+                Saved at{" "}
+                {new DateObject(loc.timestamp).format("DD/MM/YYYY HH:mm:ss")}
+              </Popup>
             </Marker>
           ))}
           <Polyline
@@ -88,7 +229,9 @@ function App() {
           />
         </MapContainer>
       ) : (
-        <p>Loading...</p>
+        <div className="h-full flex items-center">
+          <div className="loader"></div>
+        </div>
       )}
 
       <style>{`
