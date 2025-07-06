@@ -20,6 +20,7 @@ import type { LocationRet } from "./models/location";
 import DateObject from "react-date-object";
 import type { LatLngTuple } from "leaflet";
 import { Box, Drawer } from "@mui/material";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 import createNumberIcon from "../utils/createNumberIcon";
 import {
@@ -170,7 +171,6 @@ function App() {
   const DrawerList = (
     <Box
       sx={{
-        width: 250,
         padding: 2,
         display: "flex",
         flexDirection: "column",
@@ -182,7 +182,7 @@ function App() {
       onClick={toggleDrawer(false)}
     >
       <div
-        className="min-w-50 py-5"
+        className="w-full py-5"
         onClick={(e) => {
           e.stopPropagation();
         }}
@@ -220,7 +220,7 @@ function App() {
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 w-full">
         <TextField
           label="Vehicle number"
           variant="outlined"
@@ -256,73 +256,15 @@ function App() {
   );
 
   return (
-    <div className="h-screen w-screen flex flex-col items-center">
-      <h1 className="text-2xl text-center my-10">
-        Auto get location after 10s. Time left: {getLocationsTimer}s
+    <div className="h-screen w-screen flex flex-col items-center relative">
+      <h1 className="text-2xl text-center fw-bold bg-slate-50 opacity-[0.8] p-2 absolute text-black z-1 right-0 top-0">
+        Auto reload: {getLocationsTimer}s
       </h1>
-      <div className="mb-5 self-end md:self-auto">
-        <div className="hidden md:flex flex-col md:flex-row gap-4 items-center justify-content-between">
-          <div className="min-w-50">
-            <FormControl fullWidth>
-              <InputLabel id="query_type" className="text-white">
-                Chose data time
-              </InputLabel>
-              <Select
-                labelId="query_type"
-                id="query_type"
-                value={queryType}
-                label="Chose data time"
-                onChange={handleChange}
-              >
-                <MenuItem value={"Today"}>Today</MenuItem>
-                <MenuItem value={"Time range"}>Time range</MenuItem>
-                <MenuItem value={"All time"}>All time</MenuItem>
-              </Select>
-            </FormControl>
-            {queryType === "Time range" && (
-              <div className="flex flex-col gap-2 md:gap-0 md:flex-row mt-3 justify-content-between">
-                <DatePicker
-                  className="py-2 px-2 border-1 rounded mx-3"
-                  selected={startDate}
-                  dateFormat={"dd/MM/yyyy"}
-                  onChange={(date) => setStartDate(date as Date | null)}
-                />
-                <DatePicker
-                  className="py-2 px-2 border-1 rounded mx-3"
-                  selected={endDate}
-                  dateFormat={"dd/MM/yyyy"}
-                  onChange={(date) => setEndDate(date as Date | null)}
-                />
-              </div>
-            )}
-          </div>
-          <TextField
-            label="Vehicle number"
-            variant="outlined"
-            placeholder="Enter vehicle number"
-            value={vehicleNumber}
-            onChange={(e) => {
-              setVehicleNumber(e.target.value);
-              localStorage.setItem("vehicleNumber", e.target.value);
-            }}
-          />
-          <TextField
-            label="Limit"
-            type="number"
-            variant="outlined"
-            placeholder="Enter limit"
-            value={Number(limit)}
-            onChange={(e) => {
-              setLimit(Number(e.target.value));
-              localStorage.setItem("limit", e.target.value);
-            }}
-          />
-          <Button variant="contained" onClick={handleSearch}>
-            Search
+      <div className="absolute bottom-10 z-1 right-0">
+        <div className="text-center">
+          <Button onClick={toggleDrawer(true)}>
+            <SettingsIcon sx={{ fontSize: 60 }} />
           </Button>
-        </div>
-        <div className="md:hidden text-center">
-          <Button onClick={toggleDrawer(true)}>Open drawer</Button>
           <Drawer open={open} onClose={toggleDrawer(false)} anchor="right">
             {DrawerList}
           </Drawer>
@@ -339,7 +281,7 @@ function App() {
             <Marker
               key={loc._id}
               position={[loc.latitude, loc.longitude]}
-              icon={createNumberIcon(index + 1)}
+              icon={createNumberIcon(index + 1, index === locations.length - 1)}
             >
               <Popup>
                 Saved at{" "}
