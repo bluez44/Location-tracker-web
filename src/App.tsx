@@ -5,8 +5,7 @@ import {
   TileLayer,
   Marker,
   Popup,
-  Polyline,
-  useMap,
+  Polyline
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
