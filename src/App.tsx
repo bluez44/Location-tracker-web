@@ -237,6 +237,7 @@ function App() {
           variant="outlined"
           placeholder="Enter limit"
           value={Number(limit)}
+          onClick={(e) => e.stopPropagation()}
           onChange={(e) => {
             setLimit(Number(e.target.value));
             localStorage.setItem("limit", e.target.value);
