@@ -231,6 +231,17 @@ function App() {
             localStorage.setItem("vehicleNumber", e.target.value);
           }}
         />
+        <TextField
+          label="Limit"
+          type="number"
+          variant="outlined"
+          placeholder="Enter limit"
+          value={Number(limit)}
+          onChange={(e) => {
+            setLimit(Number(e.target.value));
+            localStorage.setItem("limit", e.target.value);
+          }}
+        />
         <Button
           className="text-center mx-auto"
           variant="contained"
