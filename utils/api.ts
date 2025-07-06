@@ -1,8 +1,8 @@
 import instance from "../api";
 
-const getAllLocations = async (vehicleNumber: string) => {
+const getAllLocations = async (vehicleNumber: string, limit: number) => {
   const res = await instance.get(
-    `/api/locations?vehicleNumber=${vehicleNumber}`
+    `/api/locations?vehicleNumber=${vehicleNumber}&limit=${limit}`
   );
 
   if (res.status === 200) {
@@ -12,9 +12,9 @@ const getAllLocations = async (vehicleNumber: string) => {
   return null;
 };
 
-const getTodayLocations = async (vehicleNumber: string) => {
+const getTodayLocations = async (vehicleNumber: string, limit: number) => {
   const res = await instance.get(
-    `/api/locations/today?vehicleNumber=${vehicleNumber}`
+    `/api/locations/today?vehicleNumber=${vehicleNumber}&limit=${limit}`
   );
 
   if (res.status === 200) {
@@ -26,11 +26,12 @@ const getTodayLocations = async (vehicleNumber: string) => {
 
 const getTimeRangeLocations = async (
   vehicleNumber: string,
+  limit: number,
   startDate: Date,
   endDate: Date
 ) => {
   const res = await instance.get(
-    `/api/locations/date-range?vehicleNumber=${vehicleNumber}&startDate=${startDate}&endDate=${endDate}`
+    `/api/locations/date-range?vehicleNumber=${vehicleNumber}&limit=${limit}&startDate=${startDate}&endDate=${endDate}`
   );
 
   if (res.status === 200) {
