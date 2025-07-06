@@ -16,8 +16,7 @@ import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import DatePicker from "react-datepicker";
 import Button from "@mui/material/Button";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import type { LocationRet } from "../models/location";
+import type { LocationRet } from "./models/location";
 import DateObject from "react-date-object";
 import type { LatLngTuple } from "leaflet";
 import { Box, Drawer } from "@mui/material";
@@ -28,6 +27,8 @@ import {
   getTimeRangeLocations,
   getTodayLocations,
 } from "../utils/api";
+
+import NotFound from "./components/Notfound";
 
 function App() {
   const [locations, setLocations] = useState<LocationRet[]>([]);
@@ -359,11 +360,7 @@ function App() {
           </div>
         </div>
       ) : (
-        <div className="h-full md:w-1/2 flex justify-content-center items-center">
-          <div className="h-auto w-full">
-            <DotLottieReact src="../public/nodata.lottie" loop autoplay />
-          </div>
-        </div>
+        <NotFound />
       )}
 
       <style>{`
