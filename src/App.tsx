@@ -6,9 +6,10 @@ import {
   Marker,
   Popup,
   Polyline,
+  useMap,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
@@ -18,7 +19,8 @@ import DatePicker from "react-datepicker";
 import Button from "@mui/material/Button";
 import type { LocationRet } from "./models/location";
 import DateObject from "react-date-object";
-import type { LatLngTuple } from "leaflet";
+import type { LatLngTuple} from "leaflet";
+import type { Marker as LeafletMarker } from "leaflet";
 import { Box, Drawer } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 
@@ -163,7 +165,6 @@ function App() {
 
   const toggleDrawer =
     (newOpen: boolean) => (e: React.KeyboardEvent | React.MouseEvent) => {
-      console.log(e);
       e.preventDefault();
       setOpen(newOpen);
     };
@@ -255,6 +256,14 @@ function App() {
     </Box>
   );
 
+  const markerRef = useRef<LeafletMarker | null>(null)
+
+  useEffect(() => {
+    if (markerRef.current) {
+      markerRef.current.openPopup();
+    }
+  })
+
   return (
     <div className="h-screen w-screen flex flex-col items-center relative">
       <h1 className="text-2xl text-center fw-bold bg-slate-50 opacity-[0.8] p-2 absolute text-black z-1 right-0 top-0">
@@ -277,18 +286,22 @@ function App() {
           className="h-full w-full z-0"
         >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          {locations.map((loc: LocationRet, index) => (
-            <Marker
-              key={loc._id}
-              position={[loc.latitude, loc.longitude]}
-              icon={createNumberIcon(index + 1, index === locations.length - 1)}
-            >
-              <Popup>
-                Saved at{" "}
-                {new DateObject(loc.timestamp).format("DD/MM/YYYY HH:mm:ss")}
-              </Popup>
-            </Marker>
-          ))}
+          {locations.map((loc: LocationRet, index) => {
+            const isLast = index === locations.length - 1;
+            return (
+              <Marker
+                key={loc._id}
+                position={[loc.latitude, loc.longitude]}
+                icon={createNumberIcon(index + 1, isLast)}
+                ref={isLast ? markerRef : null}
+              >
+                <Popup>
+                  Saved at{" "}
+                  {new DateObject(loc.timestamp).format("DD/MM/YYYY HH:mm:ss")}
+                </Popup>
+              </Marker>
+            );
+          })}
           <Polyline
             positions={locations.map((loc) => [loc.latitude, loc.longitude])}
             pathOptions={{ color: "lime" }}
