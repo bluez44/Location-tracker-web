@@ -359,9 +359,9 @@ function App() {
           </div>
         </div>
       ) : (
-        <div className="h-full w-full md:w-1/2 flex justify-content-center items-center">
-          <div className="h-auto">
-            <DotLottieReact src="/src/assets/nodata.lottie" loop autoplay />
+        <div className="h-full md:w-1/2 flex justify-content-center items-center">
+          <div className="h-auto w-full">
+            <DotLottieReact src="../public/nodata.lottie" loop autoplay />
           </div>
         </div>
       )}
