@@ -247,11 +247,11 @@ function App() {
   );
 
   return (
-    <div className="h-screen w-screen flex flex-col items-center relative">
-      <h1 className="text-2xl text-center fw-bold bg-slate-50 opacity-[0.8] p-2 absolute text-black z-1 right-0 top-0">
+    <div className="h-screen w-screen flex flex-col items-center">
+      <h1 className="text-2xl text-center fw-bold bg-slate-50 opacity-[0.8] p-2 fixed text-black z-1 right-0 top-0">
         Auto reload: {getLocationsTimer}s
       </h1>
-      <div className="absolute bottom-10 z-1 right-0">
+      <div className="fixed bottom-10 z-1 right-0">
         <div className="text-center">
           <Button onClick={toggleDrawer(true)}>
             <SettingsIcon sx={{ fontSize: 60 }} />
@@ -274,20 +274,6 @@ function App() {
         <NotFound />
       )}
 
-      <style>{`
-        .number-marker {
-          background-color: #007bff;
-          color: white;
-          font-weight: bold;
-          text-align: center;
-          border-radius: 50%;
-          width: 30px;
-          height: 30px;
-          line-height: 30px;
-          font-size: 14px;
-          box-shadow: 0 0 4px rgba(0,0,0,0.3);
-        }
-      `}</style>
     </div>
   );
 }
