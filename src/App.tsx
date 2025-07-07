@@ -247,7 +247,7 @@ function App() {
   );
 
   return (
-    <div className="h-screen w-screen flex flex-col items-center">
+    <div className="h-dvh w-dvw flex flex-col items-center">
       <h1 className="text-2xl text-center fw-bold bg-slate-50 opacity-[0.8] p-2 fixed text-black z-1 right-0 top-0">
         Auto reload: {getLocationsTimer}s
       </h1>
@@ -273,7 +273,6 @@ function App() {
       ) : (
         <NotFound />
       )}
-
     </div>
   );
 }
