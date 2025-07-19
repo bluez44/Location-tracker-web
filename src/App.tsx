@@ -9,7 +9,7 @@ import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import DatePicker from "react-datepicker";
 import Button from "@mui/material/Button";
-import type { LocationRet } from "./models/location";
+import { type Location, type LocationRet } from "./models/location";
 import type { LatLngTuple } from "leaflet";
 import { Box, Drawer } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -35,6 +35,8 @@ function App() {
   const [limit, setLimit] = useState(
     Number(localStorage.getItem("limit")) || 0
   );
+
+  const [onClickLocation, setOnClickLocation] = useState<Location | null>(null);
 
   const [isSearching, setIsSearching] = useState(false);
 
@@ -73,10 +75,13 @@ function App() {
     return () => clearInterval(timer);
   }, [getLocationsTimer]);
 
-  const [queryType, setQueryType] = useState("");
+  const [queryType, setQueryType] = useState(
+    JSON.parse(localStorage.getItem("queryType") || '"All time"')
+  );
 
   const handleChange = (event: SelectChangeEvent) => {
     setQueryType(event.target.value as string);
+    localStorage.setItem("queryType", JSON.stringify(event.target.value));
   };
 
   const saveLatestLocationToLocal = (locationPosition: LatLngTuple) => {
@@ -261,8 +266,14 @@ function App() {
           </Drawer>
         </div>
       </div>
+      {onClickLocation && (
+        <p className="fixed bottom-0 left-0 right-0 text-center bg-slate-50 opacity-[0.8] p-2 z-10">
+          Latest saved location:{" "}
+          {onClickLocation?.displayName || "Unknown location"}
+        </p>
+      )}
       {locations.length > 0 ? (
-        <MyMap locations={locations} />
+        <MyMap locations={locations} setLocation={setOnClickLocation} />
       ) : isSearching ? (
         <div className="h-full flex justify-content-center items-center">
           <div className="flex flex-col items-center">

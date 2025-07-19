@@ -9,10 +9,17 @@ import {
 } from "react-leaflet";
 import { Marker as LeafletMarker } from "leaflet";
 import createNumberIcon from "../../utils/createNumberIcon";
+import { getAddressFromLatLong } from "../../utils/location";
 import type { LocationRet } from "../models/location";
 import React from "react";
 
-function MyMap({ locations }: { locations: LocationRet[] }) {
+function MyMap({
+  locations,
+  setLocation,
+}: {
+  locations: LocationRet[];
+  setLocation: any;
+}) {
   const markerRef = useRef<LeafletMarker | null>(null);
 
   useEffect(() => {
@@ -20,6 +27,19 @@ function MyMap({ locations }: { locations: LocationRet[] }) {
       markerRef.current.openPopup();
     }
   });
+
+  const handleReverseGeocode = async (lat: number, lon: number) => {
+    try {
+      const address = await getAddressFromLatLong(lat, lon);
+      setLocation({
+        latitude: lat,
+        longitude: lon,
+        displayName: address.display_name || "Unknown location",
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <MapContainer
@@ -34,12 +54,19 @@ function MyMap({ locations }: { locations: LocationRet[] }) {
           <Marker
             key={loc._id}
             position={[loc.latitude, loc.longitude]}
-            icon={createNumberIcon(index + 1, isLast)}
+            icon={createNumberIcon(isLast, loc.heading)}
             ref={isLast ? markerRef : null}
+            eventHandlers={{
+              click: () => {
+                handleReverseGeocode(loc.latitude, loc.longitude);
+              },
+            }}
           >
             <Popup>
-              Saved at{" "}
-              {new DateObject(loc.timestamp).format("DD/MM/YYYY HH:mm:ss")}
+              <p>
+                Saved at{" "}
+                {new DateObject(loc.timestamp).format("DD/MM/YYYY HH:mm:ss")}
+              </p>
             </Popup>
           </Marker>
         );
