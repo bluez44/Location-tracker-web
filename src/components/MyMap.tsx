@@ -24,9 +24,14 @@ function MyMap({
 
   useEffect(() => {
     if (markerRef.current) {
-      markerRef.current.openPopup();
+      const marker = markerRef.current;
+      const popup = marker.getPopup();
+      if (popup) {
+        popup.options.autoPan = false;
+      }
+      marker.openPopup();
     }
-  });
+  }, []);
 
   const handleReverseGeocode = async (lat: number, lon: number) => {
     try {
@@ -57,7 +62,7 @@ function MyMap({
             icon={createNumberIcon(isLast, loc.heading)}
             ref={isLast ? markerRef : null}
             eventHandlers={{
-              click: () => {
+              popupopen: () => {
                 handleReverseGeocode(loc.latitude, loc.longitude);
               },
             }}

@@ -268,8 +268,7 @@ function App() {
       </div>
       {onClickLocation && (
         <p className="fixed bottom-0 left-0 right-0 text-center bg-slate-50 opacity-[0.8] p-2 z-10">
-          Latest saved location:{" "}
-          {onClickLocation?.displayName || "Unknown location"}
+          Opened location: {onClickLocation?.displayName || "Unknown location"}
         </p>
       )}
       {locations.length > 0 ? (
