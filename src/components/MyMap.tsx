@@ -31,7 +31,7 @@ function MyMap({
       }
       marker.openPopup();
     }
-  }, []);
+  }, [markerRef.current]);
 
   const handleReverseGeocode = async (lat: number, lon: number) => {
     try {
