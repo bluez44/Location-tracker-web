@@ -1,11 +1,30 @@
 import L from "leaflet";
 
-export default function createNumberIcon(isLast: boolean, heading?: number) {
+export default function createNumberIcon(
+  isLast: boolean,
+  index: number,
+  heading?: number
+) {
   const color = isLast ? "green" : "#007bff";
 
   return L.divIcon({
     html: `
-      <div style="transform: rotate(${heading}deg); className: "w-20 h-20">
+      <div 
+        style="
+          transform: rotate(${heading}deg); 
+          display: flex; 
+          flex-direction: column; 
+          align-items: center; 
+          justify-content: center; 
+          width: 50px; 
+          height: 50px; 
+          background-color: white; 
+          border-radius: 50%; 
+          box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+          padding: 5px;
+          padding-top: 0px;
+          position: relative;
+        ">
         ${
           isLast
             ? `<svg xmlns="http://www.w3.org/2000/svg" height="50" width="50" viewBox="0 0 24 24" fill="${color}">
@@ -20,6 +39,9 @@ export default function createNumberIcon(isLast: boolean, heading?: number) {
             </svg>
             `
         }
+        <span style="position: absolute; bottom: -20px; color: black; font-size: 16px; font-weight: bold;">${
+          index + 1
+        }</span>
       </div>
     `,
     className: "",

@@ -59,7 +59,7 @@ function MyMap({
           <Marker
             key={loc._id}
             position={[loc.latitude, loc.longitude]}
-            icon={createNumberIcon(isLast, isLast? 0 : loc.heading)}
+            icon={createNumberIcon(isLast, index, isLast ? 0 : loc.heading)}
             ref={isLast ? markerRef : null}
             eventHandlers={{
               popupopen: () => {
