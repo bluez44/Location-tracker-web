@@ -30,7 +30,7 @@ function App() {
   const [startDate, setStartDate] = useState<Date | null>(new Date());
   const [endDate, setEndDate] = useState<Date | null>(new Date());
   const [vehicleNumber, setVehicleNumber] = useState(
-    localStorage.getItem("vehicleNumber") || ""
+    localStorage.getItem("vehicleNumber") || "ABC123"
   );
   const [limit, setLimit] = useState(
     Number(localStorage.getItem("limit")) || 0
