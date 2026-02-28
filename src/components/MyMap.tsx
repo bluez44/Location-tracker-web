@@ -8,7 +8,7 @@ import {
   TileLayer,
 } from "react-leaflet";
 import { Marker as LeafletMarker } from "leaflet";
-import createNumberIcon from "../../utils/createNumberIcon";
+import createMapMarker from "../../utils/createMarker";
 import { getAddressFromLatLong } from "../../utils/location";
 import type { LocationRet } from "../models/location";
 import React from "react";
@@ -16,6 +16,7 @@ import React from "react";
 function MyMap({
   locations,
   setLocation,
+  setIsGettingAddress,
 }: {
   locations: LocationRet[];
   setLocation: (loc: {
@@ -23,6 +24,7 @@ function MyMap({
     longitude: number;
     displayName: string;
   }) => void;
+  setIsGettingAddress: (isGetting: boolean) => void;
 }) {
   const markerRef = useRef<LeafletMarker | null>(null);
 
@@ -38,6 +40,7 @@ function MyMap({
   }, []);
 
   const handleReverseGeocode = async (lat: number, lon: number) => {
+    setIsGettingAddress(true);
     try {
       const address = await getAddressFromLatLong(lat, lon);
       setLocation({
@@ -47,6 +50,8 @@ function MyMap({
       });
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsGettingAddress(false);
     }
   };
 
@@ -76,7 +81,7 @@ function MyMap({
           <Marker
             key={loc._id}
             position={[loc.latitude, loc.longitude]}
-            icon={createNumberIcon(isLast, index, isLast ? 0 : heading)}
+            icon={createMapMarker(isLast, index, isLast ? 0 : heading)}
             ref={isLast ? markerRef : null}
             eventHandlers={{
               popupopen: () => {
@@ -86,7 +91,6 @@ function MyMap({
           >
             <Popup>
               <p>
-                Saved at{" "}
                 {new DateObject(loc.timestamp).format("DD/MM/YYYY HH:mm:ss")}
               </p>
             </Popup>

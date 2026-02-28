@@ -30,13 +30,14 @@ function App() {
   const [startDate, setStartDate] = useState<Date | null>(new Date());
   const [endDate, setEndDate] = useState<Date | null>(new Date());
   const [vehicleNumber, setVehicleNumber] = useState(
-    localStorage.getItem("vehicleNumber") || "ABC123"
+    localStorage.getItem("vehicleNumber") || "ABC123",
   );
   const [limit, setLimit] = useState(
     Number(localStorage.getItem("limit")) || 0,
   );
 
   const [onClickLocation, setOnClickLocation] = useState<Location | null>(null);
+  const [isGettingAddress, setIsGettingAddress] = useState(false);
 
   const [isSearching, setIsSearching] = useState(false);
 
@@ -251,11 +252,17 @@ function App() {
       </div>
       {onClickLocation && (
         <p className="fixed bottom-0 left-0 right-0 text-center bg-slate-50 opacity-[0.8] p-2 z-10">
-          Opened location: {onClickLocation?.displayName || "Unknown location"}
+          {isGettingAddress
+            ? "Getting address..."
+            : onClickLocation?.displayName || "Unknown location"}
         </p>
       )}
       {locations.length > 0 ? (
-        <MyMap locations={locations} setLocation={setOnClickLocation} />
+        <MyMap
+          locations={locations}
+          setLocation={setOnClickLocation}
+          setIsGettingAddress={setIsGettingAddress}
+        />
       ) : isSearching ? (
         <div className="h-full flex justify-content-center items-center">
           <div className="flex flex-col items-center">
