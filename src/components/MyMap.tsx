@@ -18,7 +18,11 @@ function MyMap({
   setLocation,
 }: {
   locations: LocationRet[];
-  setLocation: any;
+  setLocation: (loc: {
+    latitude: number;
+    longitude: number;
+    displayName: string;
+  }) => void;
 }) {
   const markerRef = useRef<LeafletMarker | null>(null);
 
@@ -31,7 +35,7 @@ function MyMap({
       }
       marker.openPopup();
     }
-  }, [markerRef.current]);
+  }, []);
 
   const handleReverseGeocode = async (lat: number, lon: number) => {
     try {
@@ -55,11 +59,24 @@ function MyMap({
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       {locations.map((loc: LocationRet, index) => {
         const isLast = index === locations.length - 1;
+
+        let heading = 0;
+        if (loc.heading !== undefined) {
+          heading = loc.heading;
+        } else {
+          if (index > 0) {
+            const prevLoc = locations[index - 1];
+            const deltaLat = loc.latitude - prevLoc.latitude;
+            const deltaLon = loc.longitude - prevLoc.longitude;
+            heading = Math.atan2(deltaLon, deltaLat) * (180 / Math.PI);
+          }
+        }
+
         return (
           <Marker
             key={loc._id}
             position={[loc.latitude, loc.longitude]}
-            icon={createNumberIcon(isLast, index, isLast ? 0 : loc.heading)}
+            icon={createNumberIcon(isLast, index, isLast ? 0 : heading)}
             ref={isLast ? markerRef : null}
             eventHandlers={{
               popupopen: () => {

@@ -1,7 +1,7 @@
 import "./App.css";
 
 import "leaflet/dist/leaflet.css";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
@@ -30,65 +30,21 @@ function App() {
   const [startDate, setStartDate] = useState<Date | null>(new Date());
   const [endDate, setEndDate] = useState<Date | null>(new Date());
   const [vehicleNumber, setVehicleNumber] = useState(
-    localStorage.getItem("vehicleNumber") || ""
+    localStorage.getItem("vehicleNumber") || "",
   );
   const [limit, setLimit] = useState(
-    Number(localStorage.getItem("limit")) || 0
+    Number(localStorage.getItem("limit")) || 0,
   );
 
   const [onClickLocation, setOnClickLocation] = useState<Location | null>(null);
 
   const [isSearching, setIsSearching] = useState(false);
 
-  const [_, setLocation] = useState<LatLngTuple>([0, 0]);
-
-  useLayoutEffect(() => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation([position.coords.latitude, position.coords.longitude]);
-        },
-        (error) => {
-          console.error("Error getting location: ", error);
-        }
-      );
-    } else {
-      console.log("Geolocation not supported");
-    }
-  }, []);
-
-  useEffect(() => {
-    handleSearch();
-  }, []);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (getLocationsTimer === 0) {
-        handleSearch();
-        setGetLocationsTimer(10);
-        return;
-      }
-
-      setGetLocationsTimer(getLocationsTimer - 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [getLocationsTimer]);
-
   const [queryType, setQueryType] = useState(
-    JSON.parse(localStorage.getItem("queryType") || '"All time"')
+    JSON.parse(localStorage.getItem("queryType") || '"All time"'),
   );
 
-  const handleChange = (event: SelectChangeEvent) => {
-    setQueryType(event.target.value as string);
-    localStorage.setItem("queryType", JSON.stringify(event.target.value));
-  };
-
-  const saveLatestLocationToLocal = (locationPosition: LatLngTuple) => {
-    localStorage.setItem("latestLocation", JSON.stringify(locationPosition));
-  };
-
-  const handleSearch = async () => {
+  const handleSearch = useCallback(async () => {
     setIsSearching(true);
     if (queryType === "Today") {
       const res = await getTodayLocations(vehicleNumber, limit);
@@ -110,7 +66,7 @@ function App() {
           vehicleNumber,
           limit,
           startDate,
-          endDate
+          endDate,
         );
 
         if (res.data.length > 0) {
@@ -143,6 +99,33 @@ function App() {
 
       setIsSearching(false);
     }
+  }, [endDate, limit, queryType, startDate, vehicleNumber]);
+
+  useEffect(() => {
+    handleSearch();
+  }, [handleSearch]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (getLocationsTimer === 0) {
+        handleSearch();
+        setGetLocationsTimer(10);
+        return;
+      }
+
+      setGetLocationsTimer(getLocationsTimer - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [getLocationsTimer, handleSearch]);
+
+  const handleChange = (event: SelectChangeEvent) => {
+    setQueryType(event.target.value as string);
+    localStorage.setItem("queryType", JSON.stringify(event.target.value));
+  };
+
+  const saveLatestLocationToLocal = (locationPosition: LatLngTuple) => {
+    localStorage.setItem("latestLocation", JSON.stringify(locationPosition));
   };
 
   useEffect(() => {
@@ -154,7 +137,7 @@ function App() {
     window.addEventListener("keydown", listener);
 
     return () => window.removeEventListener("keydown", listener);
-  }, []);
+  }, [handleSearch]);
 
   const [open, setOpen] = useState(false);
 
